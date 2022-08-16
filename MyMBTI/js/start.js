@@ -1,18 +1,26 @@
 const main = document.querySelector("#main");
 const qna = document.querySelector("#qna");
-const answerBox = document.querySelector(".answerBox");
+const result = document.querySelector("#result");
+
 const qBox = document.querySelector(".qBox");
 const statusBar = document.querySelector(".statusBar");
+const answerBox = document.querySelector(".answerBox");
 
+const resultName = document.querySelector(".resultname");
+const imgDiv = document.querySelector("#resultImg");
+const resultDesc = document.querySelector(".resultDesc");
+
+const select = new Array(12).fill(0);
 let qIdx = 0;
 const totalQna = 12;
 
 function createQnaAnswer(answers) {
-  answers.forEach(({ answer }) => {
+  answers.forEach(({ answer }, idx) => {
     const answerBtn = document.createElement("button");
 
     answerBtn.className = ["answerList", "my-3", "py-3", "mx-auto", "fadeIn"].join(" ");
     answerBtn.innerHTML = answer;
+    answerBtn.dataset.idx = idx;
     answerBox.appendChild(answerBtn);
   });
 
@@ -20,6 +28,9 @@ function createQnaAnswer(answers) {
     if (!e.target.closest(".answerList")) {
       return;
     }
+
+    const idx = e.target.dataset.idx;
+    answers[idx].type.forEach((v) => select[v]++);
 
     const children = Array.from(document.querySelectorAll(".answerList"));
 
@@ -31,8 +42,13 @@ function createQnaAnswer(answers) {
 
     setTimeout(() => {
       children.forEach((child) => (child.style.display = "none"));
+      qIdx++;
 
-      viewQna(++qIdx);
+      if (qIdx < totalQna) {
+        viewQna(qIdx);
+      } else {
+        viewResult();
+      }
     }, 450);
   };
 }
@@ -45,6 +61,21 @@ function viewQna(qIdx) {
   createQnaAnswer(a);
 
   statusBar.style.width = (100 / totalQna) * (qIdx + 1) + "%";
+}
+
+function viewResult() {
+  goResult();
+
+  const point = select.indexOf(Math.max(...select));
+  const resultImg = document.createElement("img");
+
+  resultName.innerHTML = infoList[point].name;
+  resultImg.src = "img/image-" + point + ".png";
+  resultImg.alt = point;
+  resultImg.classList.add("img-fluid");
+  imgDiv.appendChild(resultImg);
+
+  resultDesc.innerHTML = infoList[point].desc;
 }
 
 function changeSection(current, next) {
